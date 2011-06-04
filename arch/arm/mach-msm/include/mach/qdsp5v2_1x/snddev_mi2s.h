@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2010, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -26,41 +26,26 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _MACH_QDSP5_V2_MI2S_H
-#define _MACH_QDSP5_V2_MI2S_H
+#ifndef __MACH_QDSP5_V2_SNDDEV_MI2S_H
+#define __MACH_QDSP5_V2_SNDDEV_MI2S_H
 
-#define WT_16_BIT 0
-#define WT_24_BIT 1
-#define WT_32_BIT 2
-#define WT_MAX 4
-
-enum mi2s_ret_enum_type {
-	MI2S_FALSE = 0,
-	MI2S_TRUE
+struct snddev_mi2s_data {
+	u32 capability; /* RX or TX */
+	const char *name;
+	u32 copp_id; /* audpp routing */
+	u32 acdb_id; /* Audio Cal purpose */
+	u8 channel_mode;
+	u8 sd_lines;
+	void (*route) (void);
+	void (*deroute) (void);
+	u32 default_sample_rate;
 };
 
-#define MI2S_CHAN_MONO_RAW 0
-#define MI2S_CHAN_MONO_PACKED 1
-#define MI2S_CHAN_STEREO 2
-#define MI2S_CHAN_4CHANNELS 3
-#define MI2S_CHAN_6CHANNELS 4
-#define MI2S_CHAN_8CHANNELS 5
-#define MI2S_CHAN_MAX_OUTBOUND_CHANNELS MI2S__CHAN_8CHANNELS
+struct q5v2audio_mi2s_ops {
+	int (*mi2s_clk_enable)(int en);
+	int (*mi2s_data_enable)(int en, u32 direction, u8 sd_line_mask);
+};
 
-#define MI2S_SD_0    0x01
-#define MI2S_SD_1    0x02
-#define MI2S_SD_2    0x04
-#define MI2S_SD_3    0x08
+void htc_7x30_register_mi2s_ops(struct q5v2audio_mi2s_ops *ops);
 
-#define MI2S_SD_LINE_MASK    (MI2S_SD_0 | MI2S_SD_1 | MI2S_SD_2 |  MI2S_SD_3)
-
-bool mi2s_set_hdmi_output_path(uint8_t channels, uint8_t size,
-				uint8_t sd_line);
-
-bool mi2s_set_hdmi_input_path(uint8_t channels, uint8_t size, uint8_t sd_line);
-
-bool mi2s_set_codec_output_path(uint8_t channels, uint8_t size);
-
-bool mi2s_set_codec_input_path(uint8_t channels, uint8_t size);
-
-#endif /* #ifndef MI2S_H */
+#endif

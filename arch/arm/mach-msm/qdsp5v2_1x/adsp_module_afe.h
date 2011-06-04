@@ -26,41 +26,55 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _MACH_QDSP5_V2_MI2S_H
-#define _MACH_QDSP5_V2_MI2S_H
+#ifndef __ADSP_MODULE_AFE_H
+#define __ADSP_MODULE_AFE_H
 
-#define WT_16_BIT 0
-#define WT_24_BIT 1
-#define WT_32_BIT 2
-#define WT_MAX 4
+#define AFE_DEVICE_MI2S_CODEC_RX 1     /* internal codec rx path  */
+#define AFE_DEVICE_MI2S_CODEC_TX 2     /* internal codec tx path  */
+#define AFE_DEVICE_AUX_CODEC_RX  3     /* external codec rx path  */
+#define AFE_DEVICE_AUX_CODEC_TX  4     /* external codec tx path  */
+#define AFE_DEVICE_MI2S_HDMI_RX  5     /* HDMI/FM block rx path   */
+#define AFE_DEVICE_MI2S_HDMI_TX  6     /* HDMI/FM block tx path   */
+#define AFE_DEVICE_ID_MAX        7
 
-enum mi2s_ret_enum_type {
-	MI2S_FALSE = 0,
-	MI2S_TRUE
-};
+#define AFE_VOLUME_UNITY 0x4000 /* Q14 format */
 
-#define MI2S_CHAN_MONO_RAW 0
-#define MI2S_CHAN_MONO_PACKED 1
-#define MI2S_CHAN_STEREO 2
-#define MI2S_CHAN_4CHANNELS 3
-#define MI2S_CHAN_6CHANNELS 4
-#define MI2S_CHAN_8CHANNELS 5
-#define MI2S_CHAN_MAX_OUTBOUND_CHANNELS MI2S__CHAN_8CHANNELS
+#define AFE_CMD_CODEC_CONFIG_CMD     0x1
+#define AFE_CMD_CODEC_CONFIG_LEN sizeof(struct afe_cmd_codec_config)
 
-#define MI2S_SD_0    0x01
-#define MI2S_SD_1    0x02
-#define MI2S_SD_2    0x04
-#define MI2S_SD_3    0x08
+struct afe_cmd_codec_config{
+	uint16_t cmd_id;
+	uint16_t device_id;
+	uint16_t activity;
+	uint16_t sample_rate;
+	uint16_t channel_mode;
+	uint16_t volume;
+	uint16_t reserved;
+} __attribute__ ((packed));
 
-#define MI2S_SD_LINE_MASK    (MI2S_SD_0 | MI2S_SD_1 | MI2S_SD_2 |  MI2S_SD_3)
+#define AFE_CMD_AUX_CODEC_CONFIG_CMD 	0x3
+#define AFE_CMD_AUX_CODEC_CONFIG_LEN sizeof(struct afe_cmd_aux_codec_config)
 
-bool mi2s_set_hdmi_output_path(uint8_t channels, uint8_t size,
-				uint8_t sd_line);
+struct afe_cmd_aux_codec_config{
+	uint16_t cmd_id;
+	uint16_t dma_path_ctl;
+	uint16_t pcm_ctl;
+	uint16_t eight_khz_int_mode;
+	uint16_t aux_codec_intf_ctl;
+	uint16_t data_format_padding_info;
+} __attribute__ ((packed));
 
-bool mi2s_set_hdmi_input_path(uint8_t channels, uint8_t size, uint8_t sd_line);
+#define AFE_MSG_CODEC_CONFIG_ACK		0x0001
+#define AFE_MSG_CODEC_CONFIG_ACK_LEN	\
+	sizeof(struct afe_msg_codec_config_ack)
 
-bool mi2s_set_codec_output_path(uint8_t channels, uint8_t size);
+#define AFE_MSG_CODEC_CONFIG_ENABLED 0x1
+#define AFE_MSG_CODEC_CONFIG_DISABLED 0xFFFF
 
-bool mi2s_set_codec_input_path(uint8_t channels, uint8_t size);
+struct afe_msg_codec_config_ack {
+	uint16_t device_id;
+	uint16_t device_activity;
+} __attribute__((packed));
 
-#endif /* #ifndef MI2S_H */
+
+#endif
