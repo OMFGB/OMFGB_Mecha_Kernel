@@ -43,36 +43,41 @@ void mecha_back_mic_enable(int);
 
 #define MECHA_ACDB_RADIO_BUFFER_SIZE (1024 * 2304)
 
+
+// Thanks go to tiamat for this audio fix
+//
+// Source taken from: http://code.tiamat-dev.com/7x30/htc-kernel-msm7x30/commit/87760b9641d9c24af6787cc53f993f16455314cb/diffs
+//
+// rhcp
+
 static struct q5v2_hw_info q5v2_audio_hw[Q5V2_HW_COUNT] = {
 	[Q5V2_HW_HANDSET] = {
-		.max_gain[VOC_NB_INDEX] = 0,
-		.min_gain[VOC_NB_INDEX] = 0,
-		.max_gain[VOC_WB_INDEX] = 0,
-		.min_gain[VOC_WB_INDEX] = 0,
+		.max_gain[VOC_NB_INDEX] = 500,
+		.min_gain[VOC_NB_INDEX] = -1600,
+		.max_gain[VOC_WB_INDEX] = 500,
+		.min_gain[VOC_WB_INDEX] = -1600,
 	},
 	[Q5V2_HW_HEADSET] = {
-		.max_gain[VOC_NB_INDEX] = 0,
-		.min_gain[VOC_NB_INDEX] = 0,
-		.max_gain[VOC_WB_INDEX] = 0,
-		.min_gain[VOC_WB_INDEX] = 0,
+		.max_gain[VOC_NB_INDEX] = 1125,
+		.min_gain[VOC_NB_INDEX] = -1100,
+		.max_gain[VOC_WB_INDEX] = 1125,
+		.min_gain[VOC_WB_INDEX] = -1100,
 	},
 	[Q5V2_HW_SPEAKER] = {
-		.max_gain[VOC_NB_INDEX] = 0,
-		.min_gain[VOC_NB_INDEX] = 0,
-		.max_gain[VOC_WB_INDEX] = 0,
-		.min_gain[VOC_WB_INDEX] = 0,
+		.max_gain[VOC_NB_INDEX] = 1250,
+		.min_gain[VOC_NB_INDEX] = -500,
+		.max_gain[VOC_WB_INDEX] = 1250,
+		.min_gain[VOC_WB_INDEX] = -500,
 	},
 	[Q5V2_HW_BT_SCO] = {
-		.max_gain[VOC_NB_INDEX] = 500,
-		.min_gain[VOC_NB_INDEX] = -1500,
-		.max_gain[VOC_WB_INDEX] = 500,
+		.max_gain[VOC_NB_INDEX] = 750,
+		.min_gain[VOC_NB_INDEX] = -900,
+		.max_gain[VOC_WB_INDEX] = 0,
 		.min_gain[VOC_WB_INDEX] = -1500,
+
 	},
 	[Q5V2_HW_TTY] = {
-		.max_gain[VOC_NB_INDEX] = 0,
-		.min_gain[VOC_NB_INDEX] = 0,
-		.max_gain[VOC_WB_INDEX] = 0,
-		.min_gain[VOC_WB_INDEX] = 0,
+		.min_gain[VOC_WB_INDEX] = -2000,
 	},
 	[Q5V2_HW_HS_SPKR] = {
 		.max_gain[VOC_NB_INDEX] = -500,
@@ -81,16 +86,17 @@ static struct q5v2_hw_info q5v2_audio_hw[Q5V2_HW_COUNT] = {
 		.min_gain[VOC_WB_INDEX] = -2000,
 	},
 	[Q5V2_HW_USB_HS] = {
-		.max_gain[VOC_NB_INDEX] = 1000,
+		.max_gain[VOC_NB_INDEX] = 1250,
 		.min_gain[VOC_NB_INDEX] = -500,
-		.max_gain[VOC_WB_INDEX] = 1000,
+		.max_gain[VOC_WB_INDEX] = 1250,
 		.min_gain[VOC_WB_INDEX] = -500,
 	},
 	[Q5V2_HW_HAC] = {
-		.max_gain[VOC_NB_INDEX] = 100,
-		.min_gain[VOC_NB_INDEX] = -1900,
-		.max_gain[VOC_WB_INDEX] = 100,
-		.min_gain[VOC_WB_INDEX] = -1900,
+
+		.max_gain[VOC_NB_INDEX] = 1250,
+		.min_gain[VOC_NB_INDEX] = -500,
+		.max_gain[VOC_WB_INDEX] = 1250,
+		.min_gain[VOC_WB_INDEX] = -500,
 	},
 };
 
