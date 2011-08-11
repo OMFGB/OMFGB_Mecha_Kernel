@@ -22,10 +22,10 @@
 #include "board-mecha.h"
 #include <mach/tpa2051d3.h>
 
-#include <mach/qdsp5v2_1x/snddev_icodec.h>
-#include <mach/qdsp5v2_1x/snddev_ecodec.h>
-#include <mach/qdsp5v2_1x/audio_def.h>
-#include <mach/qdsp5v2_1x/voice.h>
+#include <mach/qdsp5v2/snddev_icodec.h>
+#include <mach/qdsp5v2/snddev_ecodec.h>
+#include <mach/qdsp5v2/audio_def.h>
+#include <mach/qdsp5v2/voice.h>
 #include <mach/htc_acoustic_7x30.h>
 #include <mach/htc_acdb_7x30.h>
 #include <linux/spi/spi_aic3254.h>
@@ -43,18 +43,11 @@ void mecha_back_mic_enable(int);
 
 #define MECHA_ACDB_RADIO_BUFFER_SIZE (1024 * 2304)
 
-
-// Thanks go to tiamat for this audio fix
-//
-// Source taken from: http://code.tiamat-dev.com/7x30/htc-kernel-msm7x30/commit/87760b9641d9c24af6787cc53f993f16455314cb/diffs
-//
-// rhcp
-
 static struct q5v2_hw_info q5v2_audio_hw[Q5V2_HW_COUNT] = {
 	[Q5V2_HW_HANDSET] = {
-		.max_gain[VOC_NB_INDEX] = 500,
+		.max_gain[VOC_NB_INDEX] = 1000,
 		.min_gain[VOC_NB_INDEX] = -1600,
-		.max_gain[VOC_WB_INDEX] = 500,
+		.max_gain[VOC_WB_INDEX] = 1000,
 		.min_gain[VOC_WB_INDEX] = -1600,
 	},
 	[Q5V2_HW_HEADSET] = {
@@ -70,14 +63,16 @@ static struct q5v2_hw_info q5v2_audio_hw[Q5V2_HW_COUNT] = {
 		.min_gain[VOC_WB_INDEX] = -500,
 	},
 	[Q5V2_HW_BT_SCO] = {
-		.max_gain[VOC_NB_INDEX] = 750,
+		.max_gain[VOC_NB_INDEX] = 800,
 		.min_gain[VOC_NB_INDEX] = -900,
 		.max_gain[VOC_WB_INDEX] = 0,
 		.min_gain[VOC_WB_INDEX] = -1500,
-
 	},
 	[Q5V2_HW_TTY] = {
-		.min_gain[VOC_WB_INDEX] = -2000,
+		.max_gain[VOC_NB_INDEX] = 0,
+		.min_gain[VOC_NB_INDEX] = 0,
+		.max_gain[VOC_WB_INDEX] = 0,
+		.min_gain[VOC_WB_INDEX] = 0,
 	},
 	[Q5V2_HW_HS_SPKR] = {
 		.max_gain[VOC_NB_INDEX] = -500,
@@ -92,7 +87,6 @@ static struct q5v2_hw_info q5v2_audio_hw[Q5V2_HW_COUNT] = {
 		.min_gain[VOC_WB_INDEX] = -500,
 	},
 	[Q5V2_HW_HAC] = {
-
 		.max_gain[VOC_NB_INDEX] = 1250,
 		.min_gain[VOC_NB_INDEX] = -500,
 		.max_gain[VOC_WB_INDEX] = 1250,
@@ -403,7 +397,7 @@ void __init mecha_audio_init(void)
 
 	mutex_init(&bt_sco_lock);
 
-#ifdef CONFIG_MSM7KV2_1X_AUDIO
+#ifdef CONFIG_MSM7KV2_AUDIO
 	htc_7x30_register_analog_ops(&ops);
 	htc_7x30_register_icodec_ops(&iops);
 	htc_7x30_register_ecodec_ops(&eops);
