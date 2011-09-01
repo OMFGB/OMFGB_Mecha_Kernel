@@ -43,7 +43,6 @@ static atomic_t Disable_flag = ATOMIC_INIT(0);
 struct device_attribute dev_attr_##_name = __ATTR(_name, _mode, _show, _store)
 
 static int debug_flag;
-static char update_user_calibrate_data;
 
 static int spi_microp_enable(uint8_t on)
 {
@@ -295,7 +294,6 @@ static int spi_bma150_ioctl(struct inode *inode, struct file *file, unsigned int
 	case BMA_IOCTL_WRITE:
 	case BMA_IOCTL_SET_MODE:
 	case BMA_IOCTL_SET_CALI_MODE:
-	case BMA_IOCTL_SET_UPDATE_USER_CALI_DATA:
 		if (copy_from_user(&rwbuf, argp, sizeof(rwbuf)))
 			return -EFAULT;
 		break;
@@ -376,13 +374,6 @@ static int spi_bma150_ioctl(struct inode *inode, struct file *file, unsigned int
 		if (this_pdata)
 			this_pdata->calibration_mode = rwbuf[0];
 		break;
-	case BMA_IOCTL_GET_UPDATE_USER_CALI_DATA:
-			temp = update_user_calibrate_data;
-		break;
-	case BMA_IOCTL_SET_UPDATE_USER_CALI_DATA:
-			update_user_calibrate_data = rwbuf[0];
-		break;
-
 	default:
 		return -ENOTTY;
 	}
@@ -410,10 +401,6 @@ static int spi_bma150_ioctl(struct inode *inode, struct file *file, unsigned int
 			return -EFAULT;
 		break;
 	case BMA_IOCTL_GET_CALI_MODE:
-		if (copy_to_user(argp, &temp, sizeof(temp)))
-			return -EFAULT;
-		break;
-	case BMA_IOCTL_GET_UPDATE_USER_CALI_DATA:
 		if (copy_to_user(argp, &temp, sizeof(temp)))
 			return -EFAULT;
 		break;
