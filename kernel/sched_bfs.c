@@ -127,7 +127,7 @@
  * Value is in ms and set to a minimum of 6ms. Scales with number of cpus.
  * Tunable via /proc interface.
  */
-int rr_interval __read_mostly = 10;
+int rr_interval __read_mostly = 6;
 
 /*
  * sched_iso_cpu - sysctl which determines the cpu percentage SCHED_ISO tasks
@@ -1199,7 +1199,7 @@ retry_rq:
 		 * if the runqueue has changed and p is actually now
 		 * running somewhere else!
 		 */
-		while (task_running(p) && p == rq->curr) {
+		while (task_running(p)) {
 			if (match_state && unlikely(p->state != match_state))
 				return 0;
 			cpu_relax();
