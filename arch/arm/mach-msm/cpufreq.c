@@ -39,6 +39,7 @@ struct cpufreq_work_struct {
 };
 
 static DEFINE_PER_CPU(struct cpufreq_work_struct, cpufreq_work);
+static struct workqueue_struct *msm_cpufreq_wq;
 #endif
 
 struct cpufreq_suspend_t {
@@ -288,6 +289,10 @@ static int __init msm_cpufreq_register(void)
 		mutex_init(&(per_cpu(cpufreq_suspend, cpu).suspend_mutex));
 		per_cpu(cpufreq_suspend, cpu).device_suspended = 0;
 	}
+
+#ifdef CONFIG_SMP
+	msm_cpufreq_wq = create_workqueue("msm-cpufreq");
+#endif
 
 	register_pm_notifier(&msm_cpufreq_pm_notifier);
 	return cpufreq_register_driver(&msm_cpufreq_driver);
