@@ -577,6 +577,139 @@ CPUFREQ_RELATION_L);
 }
 }
 
+//unsigned int max_load_freq;
+
+//struct cpufreq_policy *policy;
+//unsigned int j;
+
+this_dbs_info->freq_lo = 0;
+policy = this_dbs_info->cur_policy;
+
+/*
+* Every sampling_rate, we check, if current idle time is less
+* than 37% (default), then we try to increase frequency
+* Every sampling_rate, we look for a the lowest
+* frequency which can sustain the load while keeping idle time over
+* 50%. If such a frequency exist, we try to decrease to this frequency.
+*
+* Any frequency increase takes it to the maximum frequency.
+* Frequency reduction happens at minimum steps of
+* 5% (default) of current frequency
+*/
+
+/* Get Absolute Load - in terms of freq */
+max_load_freq = 0;
+
+for_each_cpu(j, policy->cpus) {
+struct cpu_dbs_info_s *j_dbs_info;
+cputime64_t cur_wall_time, cur_idle_time, cur_iowait_time;
+unsigned int idle_time, wall_time, iowait_time;
+unsigned int load, load_freq;
+int freq_avg;
+
+j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
+
+cur_idle_time = get_cpu_idle_time(j, &cur_wall_time);
+cur_iowait_time = get_cpu_iowait_time(j, &cur_wall_time);
+
+wall_time = (unsigned int) cputime64_sub(cur_wall_time,
+j_dbs_info->prev_cpu_wall);
+j_dbs_info->prev_cpu_wall = cur_wall_time;
+
+idle_time = (unsigned int) cputime64_sub(cur_idle_time,
+j_dbs_info->prev_cpu_idle);
+j_dbs_info->prev_cpu_idle = cur_idle_time;
+
+iowait_time = (unsigned int) cputime64_sub(cur_iowait_time,
+j_dbs_info->prev_cpu_iowait);
+j_dbs_info->prev_cpu_iowait = cur_iowait_time;
+
+if (dbs_tuners_ins.ignore_nice) {
+cputime64_t cur_nice;
+unsigned long cur_nice_jiffies;
+
+cur_nice = cputime64_sub(kstat_cpu(j).cpustat.nice,
+j_dbs_info->prev_cpu_nice);
+/*
+* Assumption: nice time between sampling periods will
+* be less than 2^32 jiffies for 32 bit sys
+*/
+cur_nice_jiffies = (unsigned long)
+cputime64_to_jiffies64(cur_nice);
+
+j_dbs_info->prev_cpu_nice = kstat_cpu(j).cpustat.nice;
+idle_time += jiffies_to_usecs(cur_nice_jiffies);
+}
+
+/*
+* For the purpose of ondemand, waiting for disk IO is an
+* indication that you're performance critical, and not that
+* the system is actually idle. So subtract the iowait time
+* from the cpu idle time.
+*/
+
+if (dbs_tuners_ins.io_is_busy && idle_time >= iowait_time)
+idle_time -= iowait_time;
+
+if (unlikely(!wall_time || wall_time < idle_time))
+continue;
+
+load = 100 * (wall_time - idle_time) / wall_time;
+
+freq_avg = __cpufreq_driver_getavg(policy, j);
+if (freq_avg <= 0)
+freq_avg = policy->cur;
+
+load_freq = load * freq_avg;
+if (load_freq > max_load_freq)
+max_load_freq = load_freq;
+}
+
+/* Check for frequency increase */
+if (max_load_freq > dbs_tuners_ins.up_threshold * policy->cur) {
+/* If switching to max speed, apply sampling_down_factor */
+if (policy->cur < policy->max)
+this_dbs_info->rate_mult =
+dbs_tuners_ins.sampling_down_factor;
+dbs_freq_increase(policy, policy->max);
+return;
+}
+
+/* Check for frequency decrease */
+/* if we cannot reduce the frequency anymore, break out early */
+if (policy->cur == policy->min)
+return;
+
+/*
+* The optimal frequency is the frequency that is the lowest that
+* can support the current CPU usage without triggering the up
+* policy. To be safe, we focus 10 points under the threshold.
+*/
+if (max_load_freq <
+(dbs_tuners_ins.up_threshold - dbs_tuners_ins.down_differential) *
+policy->cur) {
+unsigned int freq_next;
+freq_next = max_load_freq /
+(dbs_tuners_ins.up_threshold -
+dbs_tuners_ins.down_differential);
+
+/* No longer fully busy, reset rate_mult */
+this_dbs_info->rate_mult = 1;
+
+if (freq_next < policy->min)
+freq_next = policy->min;
+
+if (!dbs_tuners_ins.powersave_bias) {
+__cpufreq_driver_target(policy, freq_next,
+CPUFREQ_RELATION_L);
+} else {
+int freq = powersave_bias_target(policy, freq_next,
+CPUFREQ_RELATION_L);
+__cpufreq_driver_target(policy, freq,
+CPUFREQ_RELATION_L);
+}
+}
+
 	//unsigned int max_load_freq;
 
 	//struct cpufreq_policy *policy;
