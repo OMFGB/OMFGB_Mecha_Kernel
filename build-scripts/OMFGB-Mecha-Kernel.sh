@@ -15,7 +15,7 @@ make ARCH=arm clean
 echo "===== Setting up $PRODUCT defconfig ======"
 make ARCH=arm defconfig $PRODUCT_CONFIG_FILE
 echo "===== Starting the build ====="
-make ARCH=arm -j4
+make ARCH=arm -j`grep 'processor' /proc/cpuinfo | wc -l`
 
 # Check to see if zImage is available, if not the build has failed, exit 
 # the script and do not continue packaging.
@@ -67,4 +67,3 @@ java -jar $T/tools/update-zip-tools/signapk.jar $T/tools/update-zip-tools/testke
 rm $T/out/$PRODUCT/$OUTPUT_ZIP.zip
 echo "====== Done with $PRODUCT.. ======"
 
-exit 0
