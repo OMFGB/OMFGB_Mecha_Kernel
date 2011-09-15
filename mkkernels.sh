@@ -24,7 +24,6 @@ if [ -f $T/out/$PRODUCT1/kernel/zImage ];
         echo "$PRODUCT1 found"
     else
         echo "$PRODUCT1 did not compile successfully, please fix your shit"
-        exit 0
 fi
 
 # Product 2 setup
@@ -37,7 +36,6 @@ if [ -f $T/out/$PRODUCT2/kernel/zImage ];
         echo "$PRODUCT2 found"
     else
         echo "$PRODUCT2 did not compile successfully, please fix your shit"
-        exit 0
 fi
 
 # Product 3 setup
@@ -54,5 +52,3 @@ fi
 # fi
 
 echo "All kernels are done..."
-
-exit 0
