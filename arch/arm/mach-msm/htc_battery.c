@@ -1551,9 +1551,6 @@ static int handle_battery_call(struct msm_rpc_server *server,
 		args = (struct rpc_batt_mtoa_set_charging_args *)(req + 1);
 		args->enable = be32_to_cpu(args->enable);
 
-		// fast charge when less than 70%
-		if (args->enable == 1 && htc_batt_info.rep.level < 70) args->enable = 2;
-
 		// slow charge when greater than 96%
 			if (htc_batt_info.rep.level > 96) args->enable = 1;
 
@@ -1593,9 +1590,6 @@ static int handle_battery_call(struct msm_rpc_server *server,
 	    if (htc_batt_info.rep.charging_source != 1 && args->level > 96
 	      && args->level < 99)
   	      tps_set_charger_ctrl(1);
-
-		if (htc_batt_info.rep.charging_source==1 && args->level > 69 && args->level < 75)
-				tps_set_charger_ctrl(1);
 		return 0;
 	}
 	default:
